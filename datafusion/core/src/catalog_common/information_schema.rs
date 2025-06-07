@@ -104,12 +104,15 @@ impl InformationSchemaConfig {
                     // schema name may not exist in the catalog, so we need to check
                     if let Some(schema) = catalog.schema(&schema_name) {
                         for table_name in schema.table_names() {
-                            if let Some(table) = schema.table(&table_name).await? {
+                            // TODO(epg): Why is it legal for SchemaProvider::table to return None
+                            // for a name returned by SchemaProvider::table_names?  Shouldn't we
+                            // assert Some rather than quietly continuing?
+                            if let Some(table_type) = schema.table_type(&table_name).await? {
                                 builder.add_table(
                                     &catalog_name,
                                     &schema_name,
                                     &table_name,
-                                    table.table_type(),
+                                    table_type,
                                 );
                             }
                         }

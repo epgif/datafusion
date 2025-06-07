@@ -54,6 +54,15 @@ pub trait SchemaProvider: Debug + Sync + Send {
         name: &str,
     ) -> Result<Option<Arc<dyn TableProvider>>, DataFusionError>;
 
+    /// Retrieves the type of a specific table from the schema by name, if it exists,
+    /// otherwise returns `None`.
+    async fn table_type(
+        &self,
+        name: &str,
+    ) -> Result<Option<datafusion_expr::TableType>, DataFusionError> {
+        self.table(name).await.map(|o| o.map(|t| t.table_type()))
+    }
+
     /// If supported by the implementation, adds a new table named `name` to
     /// this schema.
     ///
